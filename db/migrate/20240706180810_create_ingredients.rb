@@ -2,7 +2,7 @@ class CreateIngredients < ActiveRecord::Migration[7.1]
   def change
     create_table :ingredients do |t|
       t.string :name, null: false
-      t.integer :stock, null: false, default: 0
+      t.integer :stock, null: false, default: 0, unsigned: true
 
       t.timestamps
     end
