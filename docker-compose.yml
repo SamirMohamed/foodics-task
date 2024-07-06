@@ -1,0 +1,28 @@
+services:
+  app: &app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - db
+    volumes:
+      - ./:/rails
+
+  dev:
+    <<: *app
+    build:
+      dockerfile: Dockerfile_dev
+
+  db:
+    image: mysql:8.4.0
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - mysql-db:/var/lib/mysql
+
+volumes:
+  mysql-db:
