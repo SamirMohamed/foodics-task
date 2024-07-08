@@ -46,3 +46,4 @@ group :development do
   # gem "spring"
 end
 
+gem 'activerecord-import', '~> 1.7'
