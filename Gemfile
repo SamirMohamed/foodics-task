@@ -47,3 +47,5 @@ group :development do
 end
 
 gem 'activerecord-import', '~> 1.7'
+
+gem 'interactor-rails', '~> 2.2', '>= 2.2.1'
