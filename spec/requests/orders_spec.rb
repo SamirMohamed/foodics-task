@@ -74,5 +74,58 @@ RSpec.describe "Orders", type: :request do
         expect(response).to have_http_status(:unprocessable_entity)
       end
     end
+
+    context 'with available stock level reached 50% or blew' do
+      let(:beef) { create(:ingredient, name: 'Beef', initial_stock: 200, available_stock: 200) }
+
+      let(:burger) { create(:product, name: 'Burger') }
+
+      before do
+        create(:product_ingredient, product: burger, ingredient: beef, quantity: 50)
+      end
+
+      let(:params) do
+        {
+          products: [
+            { id: burger.id, quantity: 2 }
+          ]
+        }
+      end
+
+      it 'sends low level stock email' do
+        allow(IngredientMailer).to receive_message_chain(:low_stock_alert, :deliver_now)
+
+        post orders_path, params: params, as: :json
+
+        expect(beef.reload.low_stock_alert_sent).to be_truthy
+        expect(IngredientMailer).to have_received(:low_stock_alert).once
+      end
+    end
+
+    context 'with available stock level reached 50% or blew and already mail sent' do
+      let(:beef) { create(:ingredient, name: 'Beef', initial_stock: 100, available_stock: 70, low_stock_alert_sent: true) }
+
+      let(:burger) { create(:product, name: 'Burger') }
+
+      before do
+        create(:product_ingredient, product: burger, ingredient: beef, quantity: 50)
+      end
+
+      let(:params) do
+        {
+          products: [
+            { id: burger.id, quantity: 1 }
+          ]
+        }
+      end
+
+      it 'do not sends low level stock email' do
+        allow(IngredientMailer).to receive_message_chain(:low_stock_alert, :deliver_now)
+
+        post orders_path, params: params, as: :json
+
+        expect(IngredientMailer).not_to have_received(:low_stock_alert)
+      end
+    end
   end
 end
